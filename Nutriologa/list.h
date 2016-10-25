@@ -1,197 +1,329 @@
 #ifndef LIST_H_INCLUDED
 #define LIST_H_INCLUDED
 
-#include <string>
-#include <iostream>
 #include <exception>
+#include <iostream>
+#include <string>
+#include <fstream>
 
 #include "node.h"
-#include "listExceptions.h"
 
-template <class T>
-class List {
+class ListException : public std::exception {
 
     private:
-        Node<T>* anchor;
-        int last;
-
-        bool isValidPos(Node<T>*);
-
+        std::string msg;
     public:
-        List();
-        List(const List<T>&);
-        ~List();
+        explicit ListException(const char* message): msg(message){ }
 
-        bool isEmpty();
+        explicit ListException(const std::string& message) : msg(message) { }
 
-        void insertData(Node<T>*, const T&);
-        void deleteData(Node<T>*);
+        virtual ~ListException() throw() { }
 
-        Node<T>* getFirstPos();
-        Node<T>* getLastPos();
-        Node<T>* getPrevPos(Node<T>*);
-        Node<T>* getNextPos(Node<T>*);
-        Node<T>* findData(const T&);
-
-        T& retrieve(Node<T>*);
-
-        void printData();
-
-        void deleteAll();
-
-    };
-
-template <class T>
-bool List<T>::isValidPos(Node<T>* p) {
-    Node<T>* aux = anchor;
-    while(aux != nullptr) {
-        if(aux == p) {
-            return true;
-            }
-        aux = aux->getNext();
+        virtual const char* what() const throw () {
+        return msg.c_str();
         }
-    return false;
-    }
-template <class T>
-List<T>::List() {
-    anchor = nullptr;
-    }
-template <class T>
-List<T>::List(const List<T>& l) : List() {
-    Node<T>* aux = l.anchor;
+};
 
-    while(aux != nullptr) {
-        insertData(getLastPos(), aux->getData());
+template <class T> class List{
+        private:
+            Node<T>* header;
 
-        aux = aux->getNext();
-        }
-    }
+            bool isValid(Node<T>*);
+
+            void copyAll(const List<T>&);
+            //void sortData();
+
+        public:
+
+            List();
+            List(const List<T>&);
+            ~List();
+
+            bool isEmpty();
+
+
+            void insertData(Node<T>*, const T&);
+            void deleteData(Node<T>*);
+
+            Node<T>* getFirst();
+            Node<T>* getLast();
+            Node<T>* getPrev(Node<T>*);
+            Node<T>* getNext(Node<T>*);
+            Node<T>* findData(const T&);
+
+            T retrieve(Node<T>*);
+
+            void print();
+
+            void deleteAll();
+
+            void writeToDisk(std::string);
+            void readFromDisk(std::string);
+
+            List<T>& operator = (const List<T>&);
+
+};
+
+using namespace std;
+
 template <class T>
-List<T>::~List() {
+List<T>::List(){
+    header = new Node<T>;
+    if(header == nullptr){
+        throw ListException("Unavailable Memory , Create List ");
+
+    }
+
+    header->setPrev(header);
+    header->setNext(header);
+}
+
+template <class T>
+List<T>::List(const List<T>& l) : List<T>(){
+    copyAll(l);
+}
+
+template <class T>
+List<T>& List<T>::operator = (const List<T>& l){
     deleteAll();
-    }
+
+    copyAll(l);
+
+    return *this;
+
+}
 template <class T>
-bool List<T>::isEmpty() {
-    return anchor == nullptr;
-    }
-template <class T>
-void List<T>::insertData(Node<T>* p, const T& e) {
-    if(p != nullptr and !isValidPos(p)) {
-        throw ListException("Invalid Position");
-        }
+void List<T>::copyAll(const List<T>& l){
 
-    Node<T>* aux = new Node<T>(e);
-    if(aux == nullptr) {
-        throw ListException("Insufficient Memory");
-        }
+    Node* aux = l.header->getNext();
+    Node* lastInserted = nullptr;
+    Node* newNode;
 
-    if(p == nullptr) {
-        aux->setNext(anchor);
-
-        if(anchor != nullptr) {
-            anchor->setNext(aux);
+    while(aux != l.header){
+        try{
+        newNode = new Node(aux->getData());
+    }catch(NodeException ex){
+        throw ListException("Error");
             }
-        anchor = aux;
-        }
-    else {
-        aux->setPrev(p);
-        aux->setNext(p->getNext());
 
-        if(p->getNext() != nullptr) {
+        if(newNode == nullptr){
+            throw ListException("Memory not available to copy List");
+            }
+
+        if(lastInserted == nullptr){
+            header->setNext(newNode);
+            newNode->setPrev(header);
+            }
+        else{
+            lastInserted->setNext(newNode);
+            newNode->setPrev(lastInserted);
+            }
+
+        lastInserted = newNode;
+
+        aux = aux->getNext();
+        }
+
+        header->setPrev(lastInserted);
+        lastInserted->setNext(header);
+       
+}
+
+template <class T>
+List<T>::~List(){
+    deleteAll();
+
+}
+
+template <class T>
+bool List<T>::isEmpty(){
+        return header->getNext() == header;
+}
+
+template <class T>
+void List<T>::insertData(Node<T>* p, const T& e){
+        if(p != nullptr and !isValid(p)){
+            throw ListException("Invalid Insert Position");
+            }
+
+        Node<T>* aux;
+        try{
+            aux = new Node<T>(e);
+        }catch (NodeException ex){
+            string msg;
+            msg = "Error while creating Node for Insertion";
+            msg += ex.what();
+
+            throw ListException(msg);
+            }
+        if(aux == nullptr){
+            throw ListException("Memory not available when trying to insert");
+        }
+
+        if(p == nullptr){
+                p = header;
+         
+            aux->setPrev(p);
+            aux->setNext(p->getNext());
+
             p->getNext()->setPrev(aux);
+            p->setNext(aux);
+        }
+}
+
+
+template <class T>
+void List<T>::deleteData(Node<T>* p){
+        if(!isValid(p)){
+            throw ListException("Invalid delete position");
+        }
+            p->getPrev()->setNext(p->getNext());
+            p->getNext()->setPrev(p->getPrev());
+
+
+            delete p;
+}
+
+template <class T>
+Node<T>* List<T>::getFirst(){
+        if(isEmpty()){
+            return nullptr;
+        }
+
+        return header->getNext();
+}
+
+template <class T>
+Node<T>* List<T>::getLast(){
+        if(isEmpty()){
+            return nullptr;
+        }
+        return header->getPrev();
+}
+
+template <class T>
+Node<T>* List<T>::getPrev(Node<T>* p){
+        if(!isValid(p) or p == header->getNext()){
+            return nullptr;
+        }
+
+            return p->getPrev();
+}
+
+template <class T>
+Node<T>* List<T>::getNext(Node<T>* p){
+        if(!isValid(p) or p == header->getPrev()){
+            return nullptr;
+        }
+        return p->getNext();
+}
+
+template <class T>
+Node<T>* List<T>::findData(const T& e){
+        Node<T>* aux = header->getNext;
+        while(aux != header){
+            if(aux->getData() == e){
+                return aux;
             }
-        p->setNext(aux);
+            aux = aux->getNext();
         }
-    }
-template <class T>
-void List<T>::deleteData(Node<T>* p) {
-    if(!isValidPos(p)) {
-        throw ListException("Invalid Position");
-        }
-
-    if(p->getPrev() != nullptr){
-        p->getPrev()->setNext(p->getNext());
-    }
-    if(p->getNext() != nullptr){
-        p->getNext()->setPrev(p->getPrev());
-    }
-
-    if(p == anchor){
-        anchor = anchor->getNext();
-    }
-    delete p;
-    }
-template <class T>
-Node<T>* List<T>::getFirstPos() {
-    return anchor;
-    }
-template <class T>
-Node<T>* List<T>::getLastPos() {
-    if(isEmpty()) {
         return nullptr;
+}
+
+template <class T>
+T List<T>::retrieve(Node<T>* p){
+        if(!isValid(p)){
+            throw ListException("Invalid retrieve position");
         }
 
-    Node<T>* aux = anchor;
-    while(aux->getNext() != nullptr) {
-        aux = aux->getNext();
+        try{
+            return p->getData();
+        }catch(NodeException ex){
+            string msg = "Error";
+            msg += ex.what();
+            
+            throw ListException(msg);
         }
-    return aux;
-    }
-template <class T>
-Node<T>* List<T>::getPrevPos(Node<T>* p) {
-    if(!isValidPos(p)){
-        return nullptr;
-    }
-    return p->getPrev();
 
-    }
-template <class T>
-Node<T>* List<T>::getNextPos(Node<T>* p) {
-    if(!isValidPos(p)) {
-        return nullptr;
         }
-    return p->getNext();
-    }
+        return p->getData();
+}
+/*
 template <class T>
-Node<T>* List<T>::findData(const T& e) {
-    Node<T>* aux = anchor;
-    while(aux != nullptr) {
-        if(aux->getData() == e) {
-            return aux;
+void List<T>::sortData(){
+}
+*/
+template <class T>
+void List<T>::deleteAll(){
+        Node<T>* aux = header->getNext();
+        while(header->getNext() != header){
+            aux = header->getNext();
+
+            header->setNext(header->getNext()->getNext());
+
+            delete aux;
+        }
+        header->setPrev(header);
+}
+
+template <class T>
+bool List<T>::isValid(Node<T>* p){
+        Node<T>* aux = header->getNext();
+        while(aux != header){
+            if(aux == p){
+                return true;
             }
-        aux = aux->getNext();
+            aux = aux->getNext();
         }
-    return nullptr;
-    }
+        return false;
+}
 template <class T>
-T& List<T>::retrieve(Node<T>* p) {
-    if(!isValidPos(p)) {
-        throw ListException("Invalid Position");
+void List<T>::print(){ /// recorrido circular !
+        Node<T>* aux = header->getNext();
+        while(aux != header){
+            std::cout << aux ->getData() << ".";
+
+            aux = aux->getNext();
         }
-    return p->getData();
-    }
+
+}
+
 template <class T>
-void List<T>::printData() {
-    Node<T>* aux = anchor;
-    while(aux != nullptr) {
-        std::cout << aux ->getData() << " ,";
+void List<T>::writeToDisk(std::string fileName){
 
-        aux = aux->getNext();
+        std::ofstream myFile;
+
+        myFile.open(fileName, myFile.trunc);
+        if(!myFile.is_open()){
+            throw ListException("Could not open file");
         }
-    }
+
+
+        Node<T>* aux = header->getNext();
+        while(aux != header){
+
+            myFile << aux->getData();
+
+            aux = aux->getNext();
+        }
+
+        myFile.close();
+}
+
 template <class T>
-void List<T>::deleteAll() {
-    Node<T>* aux;
-    while(anchor != nullptr) {
-        aux = anchor;
+void List<T>::readFromDisk(std::string fileName){
+        std::ifstream myFile;
+        myFile.open(fileName);
 
-        anchor = anchor->getNext();
+        if(!myFile.is_open()){
+           throw ListException("Could not open file");
+       }
 
-        delete aux;
+        T myData;
+
+        while(myFile >> myData){
+           insertData(getLast(), myData);
         }
-    }
-
-
-
-
+        myFile.close();
+}
 #endif // LIST_H_INCLUDED
