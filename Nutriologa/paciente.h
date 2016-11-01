@@ -64,8 +64,8 @@ public:
     void setWeight(const float&);
     void setHeight(const float&);
     void setAppointment(const Date&);
-    float calculateBMI(float&, float&);
 
+    float calculateBMI(float&, float&);
 
     bool operator == (const Paciente&);
     bool operator != (const Paciente&);
