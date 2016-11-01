@@ -8,7 +8,7 @@
 
 class Paciente{
 private:
-   
+
     Name name;
     Date birthDay;
     int age;
@@ -33,6 +33,7 @@ public:
 
     Name getName();
     Date getBirthDay();
+    Date getstartingDate();
     int getAge();
     char getSex();
     std::string getAddress();
@@ -45,7 +46,6 @@ public:
     bool getDrinks();
     float getWeight();
     float getHeight();
-    Date getstartingDate();
     Date getAppointment();
 
     void setName(const Name&);
@@ -63,9 +63,8 @@ public:
     void setDrinks();
     void setWeight(const float&);
     void setHeight(const float&);
-    void setStartingDate();
-    void setAppointment();
-    float calculateBMI(const float&, const float&);
+    void setAppointment(const Date&);
+    float calculateBMI(float&, float&);
 
 
     bool operator == (const Paciente&);
