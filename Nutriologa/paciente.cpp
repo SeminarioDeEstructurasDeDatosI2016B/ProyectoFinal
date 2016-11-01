@@ -173,7 +173,7 @@ float Paciente::calculateBMI(float& w,float& h){
 	float bmi;
 	float h2;
 
-	while(w and h > 0){\
+	if(w and h > 0){
 		h *= h;
 		bmi = h/w;
 	}
