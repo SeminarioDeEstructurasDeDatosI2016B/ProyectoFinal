@@ -11,6 +11,7 @@ private:
 
     Name name;
     Date birthDay;
+    Date startingDate;
     int age;
     char sex;
     std::string address;
@@ -23,7 +24,6 @@ private:
     bool drinks;
     float weight;
     float height;
-    Date startingDate;
     Date appointment;
 
 public:
