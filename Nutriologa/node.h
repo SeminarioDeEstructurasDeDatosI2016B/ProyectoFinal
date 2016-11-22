@@ -1,7 +1,7 @@
 #ifndef Node_H_INCLUDED
 #define Node_H_INCLUDED
 
-#inlcude <exception>
+#include <exception>
 
 class NodeException : public std::exception {
 
@@ -45,7 +45,7 @@ template <class T>
 Node<T>::Node(){
     prev = nullptr;
     next = nullptr;
-    dataPrt = nullptr;
+    dataPtr = nullptr;
 
 }
 template <class T>
@@ -62,11 +62,11 @@ Node<T>::~Node(){
   delete dataPtr;
 }
 template <class T>
-T Node<T>::getdataPtr(){
+T* Node<T>::getdataPtr(){
     return dataPtr;
 }
 template <class T>
-T Node<T>::getdata(){
+T& Node<T>::getData(){
     if(dataPtr == nullptr){
         throw NodeException("Unaccesible Memory");
     }
@@ -82,7 +82,7 @@ Node<T>* Node<T>::getPrev(){
 }
 template <class T>
 void Node<T>::setDataPtr(T* p){
-    data = p;
+    dataPtr = p;
 }
 template <class T>
 void Node<T>::setData(const T& e){
@@ -92,7 +92,7 @@ void Node<T>::setData(const T& e){
             throw NodeException("Unavailable Memory, setData");
         }
     }
-    else{    
+    else{
     *dataPtr = e;
     }
 }

@@ -95,13 +95,13 @@ List<T>& List<T>::operator = (const List<T>& l){
 template <class T>
 void List<T>::copyAll(const List<T>& l){
 
-    Node* aux = l.header->getNext();
-    Node* lastInserted = nullptr;
-    Node* newNode;
+    Node<T>* aux = l.header->getNext();
+    Node<T>* lastInserted = nullptr;
+    Node<T>* newNode;
 
     while(aux != l.header){
         try{
-        newNode = new Node(aux->getData());
+        newNode = new Node<T>*(aux->getData());
     }catch(NodeException ex){
         throw ListException("Error");
             }
@@ -126,7 +126,7 @@ void List<T>::copyAll(const List<T>& l){
 
         header->setPrev(lastInserted);
         lastInserted->setNext(header);
-       
+
 }
 
 template <class T>
@@ -162,7 +162,7 @@ void List<T>::insertData(Node<T>* p, const T& e){
 
         if(p == nullptr){
                 p = header;
-         
+
             aux->setPrev(p);
             aux->setNext(p->getNext());
 
@@ -241,11 +241,11 @@ T List<T>::retrieve(Node<T>* p){
         }catch(NodeException ex){
             string msg = "Error";
             msg += ex.what();
-            
+
             throw ListException(msg);
         }
 
-        }
+
         return p->getData();
 }
 /*
@@ -278,7 +278,7 @@ bool List<T>::isValid(Node<T>* p){
         return false;
 }
 template <class T>
-void List<T>::print(){ /// recorrido circular !
+void List<T>::print(){
         Node<T>* aux = header->getNext();
         while(aux != header){
             std::cout << aux ->getData() << ".";

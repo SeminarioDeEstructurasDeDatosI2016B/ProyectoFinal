@@ -2,6 +2,14 @@
 
 using namespace std;
 
+Name::Name(){
+}
+
+Name::Name(const Name& n){
+    first = n.first;
+    last = n.last;
+}
+
 string Name::getLast() {
 	return last;
 }
@@ -40,7 +48,7 @@ bool Name::operator>=(const Name& n){
 
 }
 
-std::ostream& operator << (std::ostream& os, Name& n){ //convertir en flujo
+std::ostream& operator << (std::ostream& os, Name& n){
     os << n.last << endl;
     os << n.first << endl;
 

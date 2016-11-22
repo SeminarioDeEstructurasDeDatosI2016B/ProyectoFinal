@@ -2,12 +2,20 @@
 
 #include <string>
 
+using namespace std;
+
 Paciente::Paciente(){
 
 }
 
-Paciente::Paciente(const Paciente&){
-
+Paciente::Paciente(const Paciente& p){
+    name = p.name;
+    birthDay = p.birthDay;
+    startingDate = p.startingDate;
+    age = p.age;
+    sex = p.sex;
+    weight = p.weight;
+    height = p.height;
 }
 
 Name Paciente::getName(){
@@ -203,4 +211,15 @@ bool Paciente::operator<=(const Paciente&){
 
 bool Paciente::operator>=(const Paciente&){
 
+}
+std::ostream& operator << (std::ostream& os, Paciente& p){
+    os << p.name << endl;
+    os << p.birthDay << endl;
+    os << p.startingDate << endl;
+    os << p.age << endl;
+    os << p.sex << endl;
+    os << p.weight << endl;
+    os << p.height << endl;
+
+    return os;
 }

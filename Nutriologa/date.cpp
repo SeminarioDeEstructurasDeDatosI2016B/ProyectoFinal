@@ -1,8 +1,10 @@
 #include "date.h"
 
+using namespace std;
+
 Date::Date(){
 
-   
+
 }
 
 Date::Date(const Date& d){
@@ -76,7 +78,9 @@ bool Date::operator <= (const Date& d){
 }
 
 std::ostream& operator << (std::ostream& os, Date& d){
-    os << d.year << "/" << d.month << "/" << d.day;
+    os << d.year << endl;
+    os << d.month << endl;
+    os << d.day << endl;
 
     return os;
 }
